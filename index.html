@@ -214,6 +214,48 @@
   .cw__foot b{ color:var(--ink);font-weight:500; }
   .cw__foot:empty{ display:none; }
 
+  /* ---------- "not sure which model?" ---------- */
+  .cw__help{
+    appearance:none;border:0;cursor:pointer;font-family:var(--font);
+    display:inline-flex;align-items:center;gap:8px;
+    background:rgba(232,111,50,.10);color:var(--accent);
+    font-size:13.5px;font-weight:600;letter-spacing:-.006em;
+    padding:7px 14px 7px 7px;border-radius:999px;
+    margin:-2px 0 16px;
+    transition:background .15s ease;
+  }
+  .cw__help:hover{ background:rgba(232,111,50,.17); }
+  .cw__help-q{
+    flex:none;width:20px;height:20px;border-radius:999px;
+    background:var(--accent);color:#fff;font-size:13px;font-weight:700;line-height:1;
+    display:flex;align-items:center;justify-content:center;
+  }
+
+  .cw__overlay{
+    position:fixed;inset:0;z-index:100;
+    background:rgba(0,0,0,.5);
+    display:none;align-items:center;justify-content:center;padding:16px;
+    opacity:0;transition:opacity .2s ease;
+  }
+  .cw__overlay.is-open{ display:flex;opacity:1; }
+  .cw__modal{
+    position:relative;width:100%;max-width:440px;max-height:92vh;overflow:auto;
+    background:var(--card);border-radius:20px;
+    box-shadow:0 20px 60px rgba(0,0,0,.35);
+    transform:translateY(12px);transition:transform .25s cubic-bezier(.2,.7,.2,1);
+    -webkit-overflow-scrolling:touch;
+  }
+  .cw__overlay.is-open .cw__modal{ transform:translateY(0); }
+  .cw__modal img{ display:block;width:100%;height:auto;border-radius:20px; }
+  .cw__modal-x{
+    position:absolute;top:12px;right:12px;z-index:2;
+    width:34px;height:34px;border-radius:999px;border:0;cursor:pointer;
+    background:rgba(0,0,0,.55);color:#fff;font-size:15px;line-height:1;
+    display:flex;align-items:center;justify-content:center;
+    transition:background .15s ease;
+  }
+  .cw__modal-x:hover{ background:rgba(0,0,0,.75); }
+
   @media (prefers-reduced-motion: reduce){
     *{animation:none !important;transition:none !important}
   }
@@ -232,6 +274,13 @@
   <div class="cw__body" id="view"><!-- rendered by JS --></div>
 
   <div class="cw__foot" id="foot"></div>
+</div>
+
+<div class="cw__overlay" id="guideOverlay" onclick="closeGuide()">
+  <div class="cw__modal" onclick="event.stopPropagation()" role="dialog" aria-label="How to find your model">
+    <button class="cw__modal-x" onclick="closeGuide()" aria-label="Close">✕</button>
+    <img id="guideImg" alt="How to find your device model" />
+  </div>
 </div>
 
 <script>
@@ -270,6 +319,15 @@ const CONFIG = {
     { icon: "clock",  title: "Fast turnaround", sub: "Same-day when in stock" },
     { icon: "check", title: "Quality parts", sub: "Premium components" }
   ]
+};
+
+/* "Not sure which model?" guides — image per category (upload to the repo
+   next to index.html). Console has no guide (model is on the box/console). */
+const GUIDES = {
+  iphone:  "guide-iphone.jpg",
+  samsung: "guide-samsung.jpg",
+  pixel:   "guide-pixel.jpg",
+  ipad:    "guide-ipad.jpg"
 };
 
 /* ================== OFFLINE FALLBACK (rarely used) ==================
@@ -452,9 +510,13 @@ function renderModels(){
     <button class="cw__row" onclick="pickModel('${esc(m)}')">
       <span>${m}</span>${chevron}
     </button>`).join("");
+  const help = GUIDES[state.category]
+    ? `<button class="cw__help" onclick="openGuide()"><span class="cw__help-q">?</span><span>Not sure which model? Tap here</span></button>`
+    : ``;
   view.innerHTML = `
     ${backBtn("Devices")}
     <p class="cw__step-label">Pick your ${cat.label}</p>
+    ${help}
     <div class="cw__list">${rows}</div>`;
 }
 
@@ -556,6 +618,19 @@ function book(){
 
 /* basic escaping for values placed inside onclick='...' */
 function esc(s){ return String(s).replace(/'/g,"\\'"); }
+
+/* "Not sure which model?" guide overlay */
+function openGuide(){
+  const file = GUIDES[state.category];
+  if(!file) return;
+  const img = document.getElementById("guideImg");
+  if(img.getAttribute("src") !== file) img.setAttribute("src", file); // lazy-load on first open
+  document.getElementById("guideOverlay").classList.add("is-open");
+}
+function closeGuide(){
+  document.getElementById("guideOverlay").classList.remove("is-open");
+}
+document.addEventListener("keydown", e => { if(e.key === "Escape") closeGuide(); });
 
 /* ============================ INIT ============================ */
 function renderFoot(){
