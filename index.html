@@ -130,7 +130,16 @@
   .cw__tile:focus-visible{ outline:none;border-color:var(--accent);box-shadow:0 0 0 4px rgba(232,111,50,.15); }
 
   /* ---------- rows (models + repairs) ---------- */
-  .cw__list{ display:flex;flex-direction:column;gap:8px; }
+  .cw__list{
+    display:flex;flex-direction:column;gap:8px;
+    max-height:300px;overflow-y:auto;overflow-x:hidden;
+    padding:3px;margin:-3px;
+    scrollbar-width:thin;scrollbar-color:var(--line) transparent;
+  }
+  .cw__list::-webkit-scrollbar{ width:9px; }
+  .cw__list::-webkit-scrollbar-thumb{ background:var(--line);border-radius:99px;border:3px solid var(--card); }
+  .cw__list::-webkit-scrollbar-thumb:hover{ background:var(--muted-2); }
+  .cw__list::-webkit-scrollbar-track{ background:transparent; }
   .cw__row{
     appearance:none;cursor:pointer;font-family:var(--font);width:100%;text-align:left;
     background:var(--card);border:1px solid var(--line);border-radius:var(--radius-row);
@@ -203,6 +212,7 @@
     flex-wrap:wrap;text-align:center;letter-spacing:-.004em;
   }
   .cw__foot b{ color:var(--ink);font-weight:500; }
+  .cw__foot:empty{ display:none; }
 
   @media (prefers-reduced-motion: reduce){
     *{animation:none !important;transition:none !important}
@@ -257,7 +267,7 @@ const CONFIG = {
   // icon options: "shield" | "clock" | "search" | "check" | "lock"
   benefits: [
     { icon: "shield", title: "Warranty",       sub: "" }, // sub is filled per-repair from `warranty` below
-    { icon: "clock",  title: "Fast turnaround", sub: "Most repairs same day" },
+    { icon: "clock",  title: "Fast turnaround", sub: "Same-day when in stock" },
     { icon: "check", title: "Quality parts", sub: "Premium components" }
   ]
 };
@@ -339,17 +349,19 @@ const BENEFIT_ICONS = {
    repair kind instead of one per device. EDIT freely. `fallback` covers
    anything unmatched.                                                  */
 const REPAIR_INFO = {
-  fallback:  "Repaired and fully tested by our techs before you pick it up.",
+  fallback:  "Repaired and fully tested before you pick it up.",
   match: [
-    { keys:["screen","glass","display"], text:"Premium-grade display fitted and calibrated — true-to-original color and touch." },
-    { keys:["battery"],                  text:"Fresh battery restores full capacity and all-day life, recalibrated before pickup." },
-    { keys:["charge","port"],            text:"Worn port replaced so charging — and fast charging — works reliably again." },
-    { keys:["back glass"],               text:"Original look restored and internals sealed back up from dust and moisture." },
-    { keys:["camera"],                   text:"Crisp photos again — replaced and tested across every camera mode." },
-    { keys:["hdmi"],                     text:"HDMI port rebuilt for a stable, no-flicker picture on your TV." },
-    { keys:["disc"],                     text:"Disc drive replaced so it reads, loads, and ejects games every time." },
-    { keys:["overheat","clean"],         text:"Deep-cleaned and re-pasted so it runs cool and quiet under load." },
-    { keys:["joy","drift"],              text:"Drift eliminated so your sticks track accurately again." }
+    { keys:["screen","display"], text:"Premium-grade display, color-matched and touch-tested." },
+    { keys:["battery"],          text:"Fresh battery restores full capacity and all-day life." },
+    { keys:["charge","port"],    text:"Worn port replaced so charging — and fast charging — works reliably again." },
+    { keys:["back glass"],       text:"New back glass restores the original look and finish." },
+    { keys:["camera"],           text:"Camera replaced and tested so your photos and video come out sharp again." },
+    { keys:["hdmi"],             text:"HDMI port rebuilt for a stable, no-flicker picture on your TV." },
+    { keys:["disc","disk"],      text:"Disc drive replaced so it reads, loads, and ejects games again." },
+    { keys:["hdd","hard drive"], text:"New drive installed so games and saves load quickly again." },
+    { keys:["psu","power"],      text:"Power supply replaced so it powers on and stays on reliably." },
+    { keys:["overheat","clean"], text:"Deep-cleaned and re-pasted so it runs cooler and quieter under load." },
+    { keys:["joy","drift"],      text:"Stick drift fixed so your controls track accurately again." }
   ]
 };
 function repairInfo(repair){
@@ -363,14 +375,28 @@ function repairInfo(repair){
 function priceOf(entry){ return (entry && typeof entry === "object") ? entry.price : entry; }
 function warrantyOf(entry){ return (entry && typeof entry === "object") ? (entry.warranty || "") : ""; }
 
-/* warranty meta (screen line, jsonld) pulled from the feed at load time */
+/* warranty meta (jsonld) pulled from the feed at load time */
 let META = FALLBACK_META;
 
-/* "what you get" line: screens use the feed's screen sentence (with the
-   re-repair perk); everything else uses the keyword-matched line. */
-function inclLine(repair){
-  if(/screen|glass|display/i.test(repair) && META && META.screenLine) return META.screenLine;
-  return repairInfo(repair);
+/* warranty perk lines (edit here to change wording everywhere) */
+const SCREEN_PERK   = "Covered for life against defects — and if it cracks again within 12 months, we'll repair it once for free.";
+const LIFETIME_PERK = "Covered for life against defects.";
+const YEAR_PERK     = "Backed by our 1-year warranty.";
+
+/* the perk matches the repair's ACTUAL warranty tier (from the feed),
+   so a console screen gets the 1-year line, not the lifetime one. */
+function warrantyPerk(repair, warranty){
+  const w = String(warranty || "");
+  if(/lifetime/i.test(w)) return /screen/i.test(repair) ? SCREEN_PERK : LIFETIME_PERK;
+  if(/year/i.test(w)) return YEAR_PERK;
+  return "";
+}
+
+/* "what you get" line = feature sentence + its warranty perk */
+function inclLine(repair, warranty){
+  const feature = repairInfo(repair);
+  const perk = warrantyPerk(repair, warranty);
+  return perk ? feature + " " + perk : feature;
 }
 
 /* ============================ STATE ============================ */
@@ -471,7 +497,7 @@ function renderQuote(){
           <span class="amt"><span class="num" style="font-size:28px">Custom quote</span></span>
         </div>`}
 
-      <p class="cw__incl">${inclLine(state.repair)}</p>
+      <p class="cw__incl">${inclLine(state.repair, warrantyOf(entry))}</p>
 
       <div class="cw__trust">${trust}</div>
 
@@ -528,7 +554,7 @@ function esc(s){ return String(s).replace(/'/g,"\\'"); }
 
 /* ============================ INIT ============================ */
 function renderFoot(){
-  foot.innerHTML = `<span>Same-day on most repairs ·</span> <b>${CONFIG.locations.join(" &amp; ")}</b>`;
+  foot.innerHTML = ``;
 }
 
 async function loadPrices(){
