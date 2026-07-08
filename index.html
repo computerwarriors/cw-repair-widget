@@ -399,6 +399,11 @@ function inclLine(repair, warranty){
   return perk ? feature + " " + perk : feature;
 }
 
+/* turnaround chip text — iPads & consoles run longer than phones */
+function turnaroundFor(category){
+  return (category === "ipad" || category === "console") ? "2–3 day turnaround" : "Same-day when in stock";
+}
+
 /* ============================ STATE ============================ */
 let DATA = PRICE_DATA;
 const state = { step: 0, category: null, model: null, repair: null };
@@ -470,10 +475,10 @@ function renderQuote(){
   const price = priceOf(entry);
   const hasPrice = price > 0;
   const trust = CONFIG.benefits.map(b=>{
-    // fill the Warranty item with the term for THIS repair (from the feed)
-    const sub = (b.title === "Warranty" && !b.sub)
-      ? warrantyOf(entry)
-      : b.sub;
+    // fill Warranty from the feed, and Fast turnaround by device category
+    let sub = b.sub;
+    if(b.title === "Warranty" && !b.sub) sub = warrantyOf(entry);
+    else if(b.title === "Fast turnaround") sub = turnaroundFor(state.category);
     return `
     <div class="cw__trust-item">
       <span class="cw__trust-ic">${BENEFIT_ICONS[b.icon] || BENEFIT_ICONS.check}</span>
