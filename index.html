@@ -663,6 +663,15 @@ async function loadPrices(){
 
 renderFoot();
 loadPrices();
+
+/* ---- auto-resize: tell the parent page how tall we are, so the iframe
+   fits the content exactly (no empty grey space) ---- */
+function postHeight(){
+  const h = Math.ceil(document.documentElement.scrollHeight);
+  try { window.parent.postMessage({ cwWidgetHeight: h }, "*"); } catch(e){}
+}
+window.addEventListener("load", postHeight);
+if(window.ResizeObserver){ new ResizeObserver(postHeight).observe(document.body); }
 </script>
 </body>
 </html>
