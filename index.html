@@ -336,6 +336,9 @@ const GUIDES = {
   ipad:    "guide-ipad.jpg"
 };
 
+/* Order the device tiles appear in. Anything not listed falls to the end. */
+const CATEGORY_ORDER = ["iphone", "ipad", "samsung", "pixel", "console"];
+
 /* Plain-language symptom lines shown under each repair name, so customers
    who only know the symptom can find the right repair. Keyword-matched. */
 const SYMPTOMS = {
@@ -524,7 +527,13 @@ function render(){
 }
 
 function renderCategories(){
-  const tiles = Object.entries(DATA).filter(([key])=>!key.startsWith("_")).map(([key,cat])=>`
+  const tiles = Object.entries(DATA)
+    .filter(([key])=>!key.startsWith("_"))
+    .sort((a,b)=>{
+      const ia = CATEGORY_ORDER.indexOf(a[0]), ib = CATEGORY_ORDER.indexOf(b[0]);
+      return (ia === -1 ? 99 : ia) - (ib === -1 ? 99 : ib);
+    })
+    .map(([key,cat])=>`
     <button class="cw__tile" onclick="pickCategory('${key}')">
       ${ICONS[key] || ICONS.iphone}
       <span>${cat.label}</span>
@@ -662,9 +671,13 @@ function openGuide(){
   const img = document.getElementById("guideImg");
   if(img.getAttribute("src") !== file) img.setAttribute("src", file); // lazy-load on first open
   document.getElementById("guideOverlay").classList.add("is-open");
+  guideOpen = true;
+  postHeight();
 }
 function closeGuide(){
   document.getElementById("guideOverlay").classList.remove("is-open");
+  guideOpen = false;
+  postHeight();
 }
 document.addEventListener("keydown", e => { if(e.key === "Escape") closeGuide(); });
 
@@ -701,13 +714,35 @@ renderFoot();
 loadPrices();
 
 /* ---- auto-resize: tell the parent page how tall we are, so the iframe
-   fits the content exactly (no empty grey space) ---- */
+   fits the content exactly (no empty grey space).
+   NOTE: we measure the CARD, not documentElement.scrollHeight — the latter
+   never reports smaller than the iframe's current height, so it could grow
+   but never shrink. ---- */
+function measureHeight(){
+  const card = document.getElementById("cw");
+  if(!card) return 0;
+  const cs = getComputedStyle(document.body);
+  const pad = parseFloat(cs.paddingTop || 0) + parseFloat(cs.paddingBottom || 0);
+  return Math.ceil(card.getBoundingClientRect().height + pad);
+}
+let lastH = 0;
+let guideOpen = false;
 function postHeight(){
-  const h = Math.ceil(document.documentElement.scrollHeight);
+  let h = measureHeight();
+  if(!h) return;
+  // the guide image is tall and the overlay is fixed inside the iframe,
+  // so ask the parent for extra room while it's open
+  if(guideOpen) h = Math.max(h, 820);
+  if(h === lastH) return;
+  lastH = h;
   try { window.parent.postMessage({ cwWidgetHeight: h }, "*"); } catch(e){}
 }
 window.addEventListener("load", postHeight);
-if(window.ResizeObserver){ new ResizeObserver(postHeight).observe(document.body); }
+window.addEventListener("resize", postHeight);
+if(window.ResizeObserver){
+  const card = document.getElementById("cw");
+  if(card) new ResizeObserver(postHeight).observe(card);
+}
 </script>
 </body>
 </html>
