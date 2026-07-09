@@ -132,7 +132,7 @@
   /* ---------- rows (models + repairs) ---------- */
   .cw__list{
     display:flex;flex-direction:column;gap:8px;
-    max-height:300px;overflow-y:auto;overflow-x:hidden;
+    max-height:330px;overflow-y:auto;overflow-x:hidden;
     padding:3px;margin:-3px;
     scrollbar-width:thin;scrollbar-color:var(--line) transparent;
   }
@@ -152,6 +152,12 @@
   .cw__row:focus-visible{ outline:none;border-color:var(--accent);box-shadow:0 0 0 4px rgba(232,111,50,.15); }
   .cw__row .price{ font-weight:500;color:var(--muted);white-space:nowrap;font-size:15px; }
   .cw__row .chev{ color:var(--muted-2);flex:none; }
+
+  /* two-line rows: repair name + plain-language symptom */
+  .cw__row--two{ align-items:center;padding:13px 16px; }
+  .cw__row-text{ display:flex;flex-direction:column;gap:2px;text-align:left;min-width:0; }
+  .cw__row-title{ font-size:16px;font-weight:500;color:var(--ink);letter-spacing:-.01em; }
+  .cw__row-sub{ font-size:12.5px;font-weight:400;color:var(--muted);line-height:1.35;letter-spacing:0; }
 
   /* ---------- quote reveal (signature) ---------- */
   .cw__quote{ text-align:center;padding:4px 0 0; }
@@ -330,6 +336,30 @@ const GUIDES = {
   ipad:    "guide-ipad.jpg"
 };
 
+/* Plain-language symptom lines shown under each repair name, so customers
+   who only know the symptom can find the right repair. Keyword-matched. */
+const SYMPTOMS = {
+  fallback: "",
+  match: [
+    { keys:["screen","display"], text:"Cracked glass, lines, dark spots, or touch not working" },
+    { keys:["battery"],          text:"Dies fast, shuts off randomly, or won't hold a charge" },
+    { keys:["charge","port"],    text:"Won't charge, or only charges if you hold the cable" },
+    { keys:["back glass"],       text:"Cracked glass on the back of the phone" },
+    { keys:["camera"],           text:"Blurry or black photos, or the camera won't focus" },
+    { keys:["hdmi"],             text:"No picture on the TV — black screen or \u201Cno signal\u201D" },
+    { keys:["disc","disk"],      text:"Won't take, read, or eject discs" },
+    { keys:["hdd","hard drive"], text:"Very slow loading, or storage has failed" },
+    { keys:["psu","power"],      text:"Won't turn on at all" },
+    { keys:["overheat","clean"], text:"Runs hot, loud fan, or shuts off during games" },
+    { keys:["joy","drift"],      text:"Character or cursor moves on its own" }
+  ]
+};
+function symptomFor(repair){
+  const r = String(repair).toLowerCase();
+  const hit = SYMPTOMS.match.find(m => m.keys.some(k => r.includes(k)));
+  return hit ? hit.text : SYMPTOMS.fallback;
+}
+
 /* ================== OFFLINE FALLBACK (rarely used) ==================
    Real pricing comes from priceFeedUrls above — the n8n job keeps those
    GitHub files updated from your RepairShopr wiki. This tiny sample only
@@ -409,7 +439,7 @@ const BENEFIT_ICONS = {
 const REPAIR_INFO = {
   fallback:  "Repaired and fully tested before you pick it up.",
   match: [
-    { keys:["screen","display"], text:"Premium-grade display, color-matched and touch-tested." },
+    { keys:["screen","display"], text:"Glass and display are fused, so we replace the full screen assembly — premium-grade, color-matched, and touch-tested." },
     { keys:["battery"],          text:"Fresh battery restores full capacity and all-day life." },
     { keys:["charge","port"],    text:"Worn port replaced so charging — and fast charging — works reliably again." },
     { keys:["back glass"],       text:"New back glass restores the original look and finish." },
@@ -522,10 +552,16 @@ function renderModels(){
 
 function renderRepairs(){
   const repairs = DATA[state.category].models[state.model];
-  const rows = Object.keys(repairs).map(r=>`
-    <button class="cw__row" onclick="pickRepair('${esc(r)}')">
-      <span>${r}</span>${chevron}
-    </button>`).join("");
+  const rows = Object.keys(repairs).map(r=>{
+    const sym = symptomFor(r);
+    return `
+    <button class="cw__row cw__row--two" onclick="pickRepair('${esc(r)}')">
+      <span class="cw__row-text">
+        <span class="cw__row-title">${r}</span>
+        ${sym ? `<span class="cw__row-sub">${sym}</span>` : ``}
+      </span>${chevron}
+    </button>`;
+  }).join("");
   view.innerHTML = `
     ${backBtn(DATA[state.category].label)}
     <p class="cw__step-label">${state.model} — what's the issue?</p>
