@@ -229,10 +229,6 @@
   .cw__proc .cw__trust{ margin-top:22px; }
   .cw__proc .cw__note{ text-align:center; }
 
-  /* checklist on the computer screens */
-  .cw__checks{ list-style:none;margin:18px auto 0;padding:0;max-width:360px;text-align:left; }
-  .cw__check{ display:flex;gap:10px;align-items:flex-start;padding:6px 0;font-size:14px;line-height:1.45;color:var(--ink);letter-spacing:-.006em; }
-  .cw__check-ic{ color:var(--accent);flex:none;margin-top:2px;line-height:0; }
 
   .reveal{ animation:rise .5s cubic-bezier(.2,.7,.2,1) both; }
   @keyframes rise{ from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
@@ -386,7 +382,7 @@ const CONFIG = {
   benefits: [
     { icon: "shield", title: "Warranty",       sub: "" }, // sub is filled per-repair from `warranty` below
     { icon: "clock",  title: "Fast turnaround", sub: "Same-day when in stock" },
-    { icon: "check", title: "Quality parts", sub: "Premium components" }
+    { icon: "lock", title: "Your data", sub: "Stays on your device" }
   ]
 };
 
@@ -468,17 +464,18 @@ const COMPUTER = {
 
   symptoms: [
     { id:"screen", title:"Cracked or damaged screen", sub:"Cracked, lines, flickering, or nothing displays", path:"diagnostic",
-      pitch:"Screens are one of the most common repairs we do — and one of the most fixable." },
+      pitch:"A cheap panel looks fine the day you pick it up. Six months later the color shifts or the touch goes. We'd rather quote you honestly than win on a number you'll regret." },
     { id:"power", title:"Won't turn on or won't charge", sub:"No power, no lights, or won't hold a charge", path:"diagnostic",
-      pitch:"A computer that won't power on is one of the most common things we see. Often it's a single component — but we'll know for sure once we look." },
+      pitch:"A computer that won't power on isn't a computer that's gone. Your files live on the drive, not the power system — and we'll find exactly where it's failing before anyone talks about cost." },
     { id:"slow", title:"Running slow, freezing, or crashing", sub:"Takes forever to boot, freezes, or shuts off", path:"diagnostic",
-      pitch:"Slow rarely means it's time for a new computer. It's usually a drive, memory, or software issue worth finding before you replace anything." },
+      pitch:"Sometimes slow is a failing drive or not enough memory, and it's a cheap fix. Sometimes the machine has run its course and we'll tell you to keep your money. You should know which before you spend anything." },
     { id:"virus", title:"Virus, pop-ups, or locked out", sub:"Strange behavior, ads, scam screens, or can't log in", path:"diagnostic",
-      pitch:"Pop-ups and lockouts look alarming, and they're something we handle constantly. We'll tell you exactly what we find." },
+      pitch:"Scam screens are built to panic you into calling the number on them. Don't. Bring it to us — we'll find what's actually running and clear it.",
+      proof:"We manage security for over <b>500 households</b> and IT for over <b>100 local businesses</b>. This is daily work for us." },
     { id:"data", title:"Transferring or recovering data", sub:"Moving files to a new computer, or files you can't get to", path:"transfer",
-      pitch:"Whether your drive is healthy or failing changes the job completely — so we look first, then price it with you." },
+      pitch:"If you can't reach your files, stop using the computer. Every restart puts a failing drive at more risk. Bring it in before it gets harder to save." },
     { id:"other", title:"Something else", sub:"Liquid spill, keyboard, Wi-Fi, or not sure", path:"diagnostic",
-      pitch:"Not sure what's wrong? That's exactly what the evaluation is for." }
+      pitch:"Spills, dead keys, Wi-Fi that drops — if you can't name it, you don't have to. Describing the symptom is our job, not yours." }
   ],
 
   diagnostic: {
@@ -540,55 +537,13 @@ function symptomFor(repair){
    Real pricing comes from priceFeedUrls above — the n8n job keeps those
    GitHub files updated from your RepairShopr wiki. This tiny sample only
    shows if both feeds are unreachable. New shape: repair -> {price, warranty}. */
-const FALLBACK_META = {
-  screenLine: "Premium-grade display, color-matched and touch-tested. Covered for life against defects — and if it cracks again within 12 months, we'll repair it once for free.",
-  jsonld: ""
-};
+const FALLBACK_META = { jsonld: "" };
 const PRICE_DATA = {
   iphone: { label: "iPhone", models: {
     "iPhone 15": { "Screen Repair": { price: 189.95, warranty: "Lifetime warranty" }, "Battery Repair": { price: 139.95, warranty: "1-year warranty" } }
   }}
 };
-const _UNUSED_OLD = {
-  iphone: { label: "iPhone", models: {
-    "iPhone 15 Pro Max": { "Screen": 0, "Battery": 0, "Charge Port": 0, "Back Glass": 0, "Camera": 0 },
-    "iPhone 15 Pro":     { "Screen": 0, "Battery": 0, "Charge Port": 0, "Back Glass": 0, "Camera": 0 },
-    "iPhone 15":         { "Screen": 0, "Battery": 0, "Charge Port": 0, "Back Glass": 0 },
-    "iPhone 14":         { "Screen": 0, "Battery": 0, "Charge Port": 0, "Back Glass": 0 },
-    "iPhone 13":         { "Screen": 0, "Battery": 0, "Charge Port": 0, "Back Glass": 0 },
-    "iPhone 12":         { "Screen": 0, "Battery": 0, "Charge Port": 0 },
-    "iPhone 11":         { "Screen": 0, "Battery": 0, "Charge Port": 0 },
-    "iPhone SE (2022)":  { "Screen": 0, "Battery": 0, "Charge Port": 0 }
-  }},
-  ipad: { label: "iPad", models: {
-    "iPad Pro 12.9\"": { "Screen / Glass": 0, "Battery": 0, "Charge Port": 0 },
-    "iPad Air":        { "Screen / Glass": 0, "Battery": 0, "Charge Port": 0 },
-    "iPad 10th Gen":   { "Screen / Glass": 0, "Battery": 0, "Charge Port": 0 },
-    "iPad 9th Gen":    { "Screen / Glass": 0, "Battery": 0, "Charge Port": 0 },
-    "iPad Mini":       { "Screen / Glass": 0, "Battery": 0, "Charge Port": 0 }
-  }},
-  samsung: { label: "Samsung", models: {
-    "Galaxy S24 Ultra": { "Screen": 0, "Battery": 0, "Charge Port": 0, "Back Glass": 0 },
-    "Galaxy S23":       { "Screen": 0, "Battery": 0, "Charge Port": 0, "Back Glass": 0 },
-    "Galaxy S22":       { "Screen": 0, "Battery": 0, "Charge Port": 0, "Back Glass": 0 },
-    "Galaxy A15":       { "Screen": 0, "Battery": 0, "Charge Port": 0 },
-    "Galaxy Note 20":   { "Screen": 0, "Battery": 0, "Charge Port": 0 }
-  }},
-  pixel: { label: "Pixel", models: {
-    "Pixel 8 Pro": { "Screen": 0, "Battery": 0, "Charge Port": 0 },
-    "Pixel 8":     { "Screen": 0, "Battery": 0, "Charge Port": 0 },
-    "Pixel 7":     { "Screen": 0, "Battery": 0, "Charge Port": 0 },
-    "Pixel 6":     { "Screen": 0, "Battery": 0, "Charge Port": 0 }
-  }},
-  console: { label: "Console", models: {
-    "PlayStation 5":     { "HDMI Port": 0, "Disc Drive": 0, "Overheating / Clean": 0 },
-    "PlayStation 4":     { "HDMI Port": 0, "Disc Drive": 0, "Overheating / Clean": 0 },
-    "Xbox Series X / S": { "HDMI Port": 0, "Disc Drive": 0, "Overheating / Clean": 0 },
-    "Xbox One":          { "HDMI Port": 0, "Disc Drive": 0, "Overheating / Clean": 0 },
-    "Nintendo Switch":   { "Screen": 0, "Charge Port": 0, "Joy-Con Drift": 0 },
-    "Switch OLED":       { "Screen": 0, "Charge Port": 0, "Joy-Con Drift": 0 }
-  }}
-};
+
 
 /* category icons */
 const ICONS = {
@@ -614,21 +569,31 @@ const BENEFIT_ICONS = {
    repair kind instead of one per device. EDIT freely. `fallback` covers
    anything unmatched.                                                  */
 const REPAIR_INFO = {
-  fallback:  "Repaired and fully tested before you pick it up.",
+  fallback:  "Repaired and fully tested before it leaves the bench.",
   match: [
-    { keys:["screen","display"], text:"Glass and display are fused, so we replace the full screen assembly — premium-grade, color-matched, and touch-tested." },
-    { keys:["battery"],          text:"Fresh battery restores full capacity and all-day life." },
-    { keys:["charge","port"],    text:"Worn port replaced so charging — and fast charging — works reliably again." },
-    { keys:["back glass"],       text:"New back glass restores the original look and finish." },
-    { keys:["camera"],           text:"Camera replaced and tested so your photos and video come out sharp again." },
-    { keys:["hdmi"],             text:"HDMI port rebuilt for a stable, no-flicker picture on your TV." },
-    { keys:["disc","disk"],      text:"Disc drive replaced so it reads, loads, and ejects games again." },
-    { keys:["hdd","hard drive"], text:"New drive installed so games and saves load quickly again." },
-    { keys:["psu","power"],      text:"Power supply replaced so it powers on and stays on reliably." },
-    { keys:["overheat","clean"], text:"Deep-cleaned and re-pasted so it runs cooler and quieter under load." },
-    { keys:["joy","drift"],      text:"Stick drift fixed so your controls track accurately again." }
+    /* screens are handled by screenLine() — category-aware */
+    { keys:["battery"],          text:"A fresh cell restores full rated capacity, so it holds a charge again." },
+    { keys:["charge","port"],    text:"A worn port is why the cable only works at the right angle. We replace it so it charges the first time, every time." },
+    { keys:["back glass"],       text:"New back glass, seated and finished so it looks the way it did the day you bought it." },
+    { keys:["camera"],           text:"Camera replaced and tested across every mode, so your photos come back sharp." },
+    { keys:["hdmi"],             text:"We rebuild the port so your console locks onto the TV \u2014 no flicker, no \u201Cno signal.\u201D" },
+    { keys:["disc","disk"],      text:"A new drive so it takes, reads, and ejects every disc without a fight." },
+    { keys:["hdd","hard drive"], text:"A new drive gets it loading and storing games reliably again." },
+    { keys:["psu","power"],      text:"New power supply, so it turns on the first time and stays on." },
+    { keys:["overheat","clean"], text:"Deep-cleaned and re-pasted so it runs cool and quiet, even in long sessions." },
+    { keys:["joy","drift"],      text:"Sticks replaced and calibrated, so your aim goes where you point it." }
   ]
 };
+
+/* Screens differ by device: phones are laminated (glass fused to display, so
+   the whole assembly is replaced). iPads and the Switch often have separate
+   glass — where a glass-only repair is a real option. Never claim otherwise. */
+function screenLine(category){
+  const laminated = (category === "iphone" || category === "samsung" || category === "pixel");
+  return laminated
+    ? "On modern phones the glass and display are fused, so we fit a complete premium-grade assembly \u2014 color-matched and touch-tested before it leaves the bench."
+    : "We fit a premium-grade panel, color-matched and touch-tested before it leaves the bench.";
+}
 function repairInfo(repair){
   const r = String(repair).toLowerCase();
   const hit = REPAIR_INFO.match.find(m => m.keys.some(k => r.includes(k)));
@@ -658,8 +623,9 @@ function warrantyPerk(repair, warranty){
 }
 
 /* "what you get" line = feature sentence + its warranty perk */
-function inclLine(repair, warranty){
-  const feature = repairInfo(repair);
+function inclLine(category, repair, warranty){
+  const isScreen = /screen|display/i.test(repair) && !/back glass/i.test(repair);
+  const feature = isScreen ? screenLine(category) : repairInfo(repair);
   const perk = warrantyPerk(repair, warranty);
   return perk ? feature + " " + perk : feature;
 }
@@ -677,7 +643,6 @@ const view  = document.getElementById('view');
 const rail  = document.getElementById('rail');
 const foot  = document.getElementById('foot');
 
-const money = n => "$" + Number(n).toLocaleString("en-US");
 const chevron = '<svg class="chev" width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="m9 6 6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
 const backArrow = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="m15 6-6 6 6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
 
@@ -750,7 +715,7 @@ function renderComputerOutcome(){
       <p class="cw__eyebrow">${sym.title}</p>
       <h2 class="cw__headline">${sym.pitch}</h2>
 
-      <p class="cw__proof">${COMPUTER.proof}</p>
+      <p class="cw__proof">${sym.proof || COMPUTER.proof}</p>
 
       <ol class="cw__steps">${steps}</ol>
 
@@ -824,11 +789,16 @@ function renderQuote(){
   const price = priceOf(entry);
   const hasPrice = price > 0;
   const cc = CAT_COLORS[state.category] || { ink:"var(--ink)", bg:"#f1f1f4" };
+  // a drive replacement doesn't carry the old data over — never promise it does
+  const driveSwap = /hdd|hard drive|disk drive|disc drive/i.test(state.repair);
   const trust = CONFIG.benefits.map(b=>{
-    // fill Warranty from the feed, and Fast turnaround by device category
-    let sub = b.sub;
+    let title = b.title, sub = b.sub, icon = b.icon;
     if(b.title === "Warranty" && !b.sub) sub = warrantyOf(entry);
     else if(b.title === "Fast turnaround") sub = turnaroundFor(state.category);
+    else if(b.title === "Your data" && driveSwap){
+      title = "Tested before pickup"; sub = "Checked, not just swapped"; icon = "check";
+    }
+    b = { icon, title, sub };
     return `
     <div class="cw__trust-item">
       <span class="cw__trust-ic" style="background:${cc.bg};color:${cc.ink}">${BENEFIT_ICONS[b.icon] || BENEFIT_ICONS.check}</span>
@@ -852,7 +822,7 @@ function renderQuote(){
           <span class="amt"><span class="num" style="font-size:28px">Custom quote</span></span>
         </div>`}
 
-      <p class="cw__incl">${inclLine(state.repair, warrantyOf(entry))}</p>
+      <p class="cw__incl">${inclLine(state.category, state.repair, warrantyOf(entry))}</p>
 
       <div class="cw__trust">${trust}</div>
 
@@ -886,7 +856,6 @@ function pickSymptom(id){ state.symptom = id; state.step = 2; render(); }
 function goBack(){ if(state.step>0){ state.step--; render(); } }
 function reset(){ state.step=0; state.category=state.model=state.repair=state.symptom=null; render(); }
 
-const CHECK_ICON = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="m5 12.5 4.2 4.2L19 7" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
 
 function book(){
   const f = CONFIG.acuityFields || {};
