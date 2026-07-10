@@ -359,8 +359,17 @@ const CONFIG = {
     "https://raw.githubusercontent.com/computerwarriors/cw-pricing-data/main/prices-devices.json",
     "https://raw.githubusercontent.com/computerwarriors/cw-pricing-data/main/prices-consoles.json"
   ],
-  // Acuity scheduling page — opens in a new tab from the orange CTA.
-  bookingUrl: "https://computer-warriors.as.me/?ref=quote_widget",
+  // Acuity direct links — each category lands straight on the right appointment
+  // type, so the customer never picks one and always sees the matching form.
+  bookingUrls: {
+    iphone:   "https://computer-warriors.as.me/Phone-Repair",
+    samsung:  "https://computer-warriors.as.me/Phone-Repair",
+    pixel:    "https://computer-warriors.as.me/Phone-Repair",
+    ipad:     "https://computer-warriors.as.me/iPad-Console-Drop-Off",
+    console:  "https://computer-warriors.as.me/iPad-Console-Drop-Off",
+    computer: "https://computer-warriors.as.me/Computer-Repair-Drop-Off"
+  },
+  bookingUrl: "https://computer-warriors.as.me/",  // fallback if a category is missing above
 
   // Acuity intake field IDs — PHONE / TABLET / CONSOLE form.
   // book() sends "field:<id>=<value>".
@@ -884,8 +893,9 @@ function book(){
   }
 
   if(!parts.length){ add("device", state.model || "Computer"); }
-  const sep = CONFIG.bookingUrl.indexOf("?") !== -1 ? "&" : "?";
-  window.open(CONFIG.bookingUrl + sep + parts.join("&"), "_blank", "noopener");
+  const base = (CONFIG.bookingUrls && CONFIG.bookingUrls[state.category]) || CONFIG.bookingUrl;
+  const sep = base.indexOf("?") !== -1 ? "&" : "?";
+  window.open(base + sep + parts.join("&"), "_blank", "noopener");
 }
 
 /* basic escaping for values placed inside onclick='...' */
