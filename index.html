@@ -111,6 +111,11 @@
     font-size:19px;font-weight:600;letter-spacing:-.014em;color:var(--ink);
     margin:0 0 18px;
   }
+  .cw__step-label--tight{ margin-bottom:6px; }
+  .cw__intro{
+    font-size:13.5px;line-height:1.5;color:var(--muted);
+    margin:0 0 16px;letter-spacing:-.004em;
+  }
 
   /* ---------- category grid ---------- */
   .cw__grid{ display:grid;grid-template-columns:repeat(2,1fr);gap:12px; }
@@ -194,32 +199,32 @@
     color:var(--ink);margin:0 0 14px;
   }
   .cw__proof{
-    font-size:12.5px;line-height:1.45;color:var(--muted);
-    background:#F7F8FA;border-radius:10px;padding:10px 12px;
-    margin:0 0 22px;
+    font-size:13px;line-height:1.5;color:var(--muted);
+    margin:0 0 24px;letter-spacing:-.004em;
   }
+  .cw__proof b{ color:var(--ink);font-weight:600; }
   .cw__close{
     font-size:14.5px;font-weight:500;color:var(--ink);letter-spacing:-.008em;
     text-align:center;margin:22px 0 0;
   }
-  .cw__proc .cw__note{ text-align:center;margin-top:12px; }
+  .cw__proc .cw__note{ text-align:center;margin-top:10px;font-size:11.5px;max-width:320px; }
   .cw__steps{ list-style:none;margin:0;padding:0;position:relative; }
-  .cw__step{ display:flex;gap:14px;position:relative;padding-bottom:20px; }
+  .cw__step{ display:flex;gap:13px;position:relative;padding-bottom:16px; }
   .cw__step:last-child{ padding-bottom:4px; }
   /* connecting spine */
   .cw__step:not(:last-child)::before{
-    content:"";position:absolute;left:13px;top:30px;bottom:2px;width:1.5px;
+    content:"";position:absolute;left:12px;top:28px;bottom:2px;width:1.5px;
     background:var(--line);
   }
   .cw__step-num{
-    flex:none;width:27px;height:27px;border-radius:999px;z-index:1;
+    flex:none;width:25px;height:25px;border-radius:999px;z-index:1;
     background:#4A6FD6;color:#fff;
-    font-size:13px;font-weight:600;line-height:1;
+    font-size:12.5px;font-weight:600;line-height:1;
     display:flex;align-items:center;justify-content:center;
   }
   .cw__step-body{ display:flex;flex-direction:column;gap:3px;padding-top:2px; }
-  .cw__step-t{ font-size:16px;font-weight:600;color:var(--ink);letter-spacing:-.012em; }
-  .cw__step-d{ font-size:14px;color:var(--muted);line-height:1.45;letter-spacing:-.004em; }
+  .cw__step-t{ font-size:15px;font-weight:600;color:var(--ink);letter-spacing:-.01em; }
+  .cw__step-d{ font-size:13.5px;color:var(--muted);line-height:1.42;letter-spacing:-.003em; }
 
   .cw__proc .cw__trust{ margin-top:22px; }
   .cw__proc .cw__note{ text-align:center; }
@@ -455,10 +460,11 @@ const CATEGORY_ORDER = ["iphone", "ipad", "samsung", "pixel", "console", "comput
 const COMPUTER = {
   label: "Computer",
   step: "What's going on?",
+  intro: "Computer pricing depends on what we find. Tell us the symptom and we'll show you exactly how it works.",
 
   /* Proof — both facts are independently true. "since 2017 alone" lets the
      reader infer the larger lifetime number without us claiming one. */
-  proof: "Serving Jacksonville &amp; Wilmington since 2010 — over 30,000 computers serviced since 2017 alone.",
+  proof: "Serving Jacksonville &amp; Wilmington since 2010 — over <b>30,000 computers</b> serviced since 2017 alone.",
 
   symptoms: [
     { id:"screen", title:"Cracked or damaged screen", sub:"Cracked, lines, flickering, or nothing displays", path:"diagnostic",
@@ -487,7 +493,7 @@ const COMPUTER = {
       { icon:"check",  title:"Honest advice",   sub:"We'll say if it's not worth fixing" }
     ],
     close: "Drop it off today. You'll know exactly where you stand in a couple of days.",
-    note: "Approve the repair and your $50 becomes a deposit toward it. If you decide not to, it covers your technician's evaluation time."
+    note: "Approve the repair and your $50 applies to it. If not, it covers your technician's evaluation time."
   },
 
   transfer: {
@@ -713,7 +719,8 @@ function renderSymptoms(){
     </button>`).join("");
   view.innerHTML = `
     ${backBtn("Devices")}
-    <p class="cw__step-label">${COMPUTER.step}</p>
+    <p class="cw__step-label cw__step-label--tight">${COMPUTER.step}</p>
+    <p class="cw__intro">${COMPUTER.intro}</p>
     <div class="cw__list">${rows}</div>`;
 }
 
