@@ -360,17 +360,22 @@ const CONFIG = {
     "https://raw.githubusercontent.com/computerwarriors/cw-pricing-data/main/prices-consoles.json"
   ],
   // Acuity scheduling page — opens in a new tab from the orange CTA.
-  // device / repair / price are appended as query params (see book()).
-  bookingUrl: "https://app.acuityscheduling.com/schedule.php?owner=39782661&ref=quote_widget",
+  bookingUrl: "https://computer-warriors.as.me/?ref=quote_widget",
 
-  // Acuity intake field IDs (fill in after you create the fields — see setup notes).
-  // Leave "" to skip that field. book() sends "field:<id>=<value>".
+  // Acuity intake field IDs — PHONE / TABLET / CONSOLE form.
+  // book() sends "field:<id>=<value>".
   acuityFields: {
     brand:  "18807792",   // Device Brand
     model:  "18807793",   // Device Model
     repair: "18807794",   // Repair Needed
-    notes:  "",           // "Anything else we should know?" — intentionally left blank for the customer
+    notes:  "",           // "Anything else we should know?" — left blank for the customer
     price:  "18807795"    // Quoted Price
+  },
+
+  // Acuity intake field IDs — COMPUTER REPAIR form (different fields).
+  acuityComputerFields: {
+    deviceType: "18818726",   // Device Type
+    issue:      "18818728"    // Primary Issue
   },
   // What the widget sends for Device Brand, by category.
   brandNames: { iphone: "Apple", ipad: "Apple", samsung: "Samsung", pixel: "Google", console: "Game Console" },
@@ -864,9 +869,11 @@ function book(){
 
   if(state.category === "computer"){
     const sym = COMPUTER.symptoms.find(s=>s.id === state.symptom) || COMPUTER.symptoms[0];
-    if(f.brand)  add("field:" + f.brand,  "Computer");
-    if(f.repair) add("field:" + f.repair, sym.title);
-    // no model, no price — the quote comes after evaluation
+    const cf = CONFIG.acuityComputerFields || {};
+    // computer form has its own fields: Device Type + Primary Issue
+    if(cf.deviceType) add("field:" + cf.deviceType, "Computer");
+    if(cf.issue) add("field:" + cf.issue, sym.title);
+    // no price — the quote comes after evaluation
   } else {
     const price = priceOf(DATA[state.category].models[state.model][state.repair]);
     const brand = (CONFIG.brandNames && CONFIG.brandNames[state.category]) || DATA[state.category].label;
